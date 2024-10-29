@@ -113,7 +113,7 @@ public class ChordProtocol implements Protocol{
 
         // Create the finger table for each node
         for (NodeInterface node : nodes.values()) {
-            int nodeIndex = node.getId();                               // NB: Assume that this is set in buildOverlayNetwork()
+            int nodeIndex = node.getId();
 
             // Initialize finger table
             List<Map<String, Object>> fingerTable = new ArrayList<>();
@@ -129,11 +129,17 @@ public class ChordProtocol implements Protocol{
                 int end = (int) (nodeIndex + Math.pow(2, (i))) % (int) Math.pow(2, m);
                 end = (i == m) ? end : end-1; // Last entry should be the first value, so do not subtract 1
 
-                // Find the successor node for the interval
-                // This is the first successor which has an index higher or equal to the start value
-                NodeInterface successorNode = node.getSuccessor();      // NB: Assume that neighbors are set in buildOverlayNetwork()
-                while (successorNode.getId() < start) successorNode = successorNode.getSuccessor();
+                NodeInterface successorNode = node;                 // Add 2^(m) to start if it is placed before the node's index in the overlay network:
+                int adjusted_start = (start <= nodeIndex) ? start : start + (int) Math.pow(2, m);   
+                int adjusted_index;
 
+                do { 
+                    successorNode = successorNode.getSuccessor();   // Retreive the next successor in the ring toplogy
+                    adjusted_index = successorNode.getId();         // Get the index of the successor
+                    if (adjusted_index <= nodeIndex) 
+                        adjusted_index += (int) Math.pow(2, m);     // If the successor is placed before the node's index, add 2^(m) to allow it to be compared with start
+
+                } while (adjusted_index < adjusted_start );         // Go to next successor if this one is not within the interval                                 
 
                 // Save the values to the entry
                 entry.put("start", start);
