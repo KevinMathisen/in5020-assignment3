@@ -332,6 +332,12 @@ public class ChordProtocolSimulator {
         implement this logic
          */
         // Look up all the key, print out as required in the Assignment Description
+        
+        // Use keyindexes to get the keys
+        // then call look_up using the index of the keys
+        //      the result is a LookUpResponse object
+        //  Should print the result to the terminal and an output file using result.toString()
+        //  also calculate average hop count which is also specified in the result
     }
 
 }
