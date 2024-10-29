@@ -130,6 +130,7 @@ public class ChordProtocol implements Protocol{
         // Retrieve all nodes
         LinkedHashMap<String, NodeInterface> nodes = network.getTopology();
 
+        
         // Create the finger table for each node
         for (NodeInterface node : nodes.values()) {
             int nodeIndex = node.getId();
@@ -137,6 +138,7 @@ public class ChordProtocol implements Protocol{
             // Initialize finger table
             List<Map<String, Object>> fingerTable = new ArrayList<>();
 
+            
             // Create m amount of entries
             for (int i = 1; i <= m; i++) {
                 Map<String, Object> entry = new HashMap<>();
@@ -147,6 +149,7 @@ public class ChordProtocol implements Protocol{
                 // Calculate end of interval
                 int end = (int) (nodeIndex + Math.pow(2, (i))) % (int) Math.pow(2, m);
                 end = (i == m) ? end : end-1; // Last entry should be the first value, so do not subtract 1
+
 
                 // Find the successor node for the interval
                 //      This is the first successor which is placed after the interval start in the overlay network
@@ -174,6 +177,7 @@ public class ChordProtocol implements Protocol{
                         adjusted_index += (int) Math.pow(2, m);     // If the successor is placed before the node's index, add 2^(m) to allow it to be compared with start
 
                 } while (adjusted_index < adjusted_start );         // Go to next successor if this one is not within the interval                                 
+
 
                 // Save the values to the entry
                 entry.put("start", start);
