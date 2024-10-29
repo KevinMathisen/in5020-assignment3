@@ -129,6 +129,21 @@ public class ChordProtocol implements Protocol{
                 int end = (int) (nodeIndex + Math.pow(2, (i))) % (int) Math.pow(2, m);
                 end = (i == m) ? end : end-1; // Last entry should be the first value, so do not subtract 1
 
+                // Find the successor node for the interval
+                //      This is the first successor which is placed after the interval start in the overlay network
+                //
+                //      Because of the network wrapping, we can't only check if the successor has a larger index than the start
+                //          as the successor can have a smaller index, but still be the first successor in the interval, if it appears after wrapping
+                //          or the start can have a small index, if it appears after wrapping, where we also want a successor which is placed after the wrapping
+                //
+                //      Instead, we need to check if the successor is the first which appears after the start. 
+                //          To do this we can shift the interval and node indexes to range from the current node's index until node's index + 2^(m)
+                //              e.g. We have m = 3 (8 possible indexes) 
+                //                  if we are creating the finger table for index 4, and a node is placed at index 1, we pretend it is placed at index 9 (1+8)
+                //                  if an interval we created starts at index 2, then we can pretend it is placed at index 10 (2+8)
+                //
+                //          This allows us to now directly check if a node's (adjusted) index is bigger than an intervals (adjusted) start
+
                 NodeInterface successorNode = node;                 // Add 2^(m) to start if it is placed before the node's index in the overlay network:
                 int adjusted_start = (start <= nodeIndex) ? start : start + (int) Math.pow(2, m);   
                 int adjusted_index;
