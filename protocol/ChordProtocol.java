@@ -164,6 +164,13 @@ public class ChordProtocol implements Protocol{
     public LookUpResponse lookUp(int keyIndex){
         /*
         implement this logic
+
+        Notes kevin:
+            Use network.getTopology() and find the node with the lowest key index to start from? 
+                alternatively chose node with name 'Node 1', or do someting else. 
+                only important that we use the same node to start the search from each time. 
+
+            When using fingertable, look at its values from the buildFingerTable() function
          */
         return null;
     }
