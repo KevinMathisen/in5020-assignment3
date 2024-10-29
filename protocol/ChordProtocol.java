@@ -6,6 +6,7 @@ import p2p.NetworkInterface;
 
 
 import java.util.*;
+import p2p.NodeInterface;
 
 /**
  * This class implements the chord protocol. The protocol is tested using the custom built simulator.
@@ -107,10 +108,37 @@ public class ChordProtocol implements Protocol{
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
     public void buildFingerTable() {
-        /*
-        implement this logic
-         */
+        LinkedHashMap<String, NodeInterface> nodes = network.getTopology();
 
+        for (NodeInterface node : nodes.values()) {
+            int nodeIndex = node.getId();                               // NB: Assume that this is set in buildOverlayNetwork()
+
+            List<Map<String, Object>> fingerTable = new ArrayList<>();
+
+            for (int i = 1; i <= m; i++) {
+                Map<String, Object> entry = new HashMap<>();
+
+                // Calculate start
+                int start = (int) (nodeIndex + Math.pow(2, (i-1))) % (int) Math.pow(2, m);
+
+                // Calculate end of interval
+                int end = (int) (nodeIndex + Math.pow(2, (i))) % (int) Math.pow(2, m);
+                end = (i == m) ? end : end-1; // Last entry should be the first value, so do not subtract 1
+
+                // Find the successor node for the interval
+                NodeInterface successorNode = node.getSuccessor();      // NB: Assume that neighbors are set in buildOverlayNetwork()
+                while (successorNode.getId() < start) successorNode = successorNode.getSuccessor();
+
+                entry.put("start", start);
+                entry.put("interval_start", start);
+                entry.put("interval_end", end);
+                entry.put("successor_node", successorNode.getName());
+
+                fingerTable.add(entry);
+            }
+
+            node.setRoutingTable(fingerTable);
+        }
     }
 
 
