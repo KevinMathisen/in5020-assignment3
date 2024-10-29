@@ -84,16 +84,35 @@ public class ChordProtocol implements Protocol{
      *           3)     add neighbor to the peer (uses Peer.addNeighbor() method)
      */
     public void buildOverlayNetwork(){
+        // Retrieve all nodes in the network
+        LinkedHashMap<String, NodeInterface> topology = network.getTopology();
 
-        /*
-        implement this logic
-         */
+        // Generate node indexes and store them in a list
+        List<Map.Entry<String, Integer>> nodesWithIndexes = new ArrayList<>();
+        for (String nodeName : topology.keySet()) {
+            int index = ch.hash(nodeName); // Hash each node's name to get a unique index
+            topology.get(nodeName).setId(index); // Set the index for each node
+            nodesWithIndexes.add(new AbstractMap.SimpleEntry<>(nodeName, index));
+        }
 
+        // Sort nodes by their indexes to arrange them in ring order
+        nodesWithIndexes.sort(Map.Entry.comparingByValue());
+
+        // Assign neighbors to form ring
+        int numNodes = nodesWithIndexes.size();
+        for (int i = 0; i < numNodes; i++) {
+            // Current node and its successor (next node in the ring)
+            String currentNodeName = nodesWithIndexes.get(i).getKey();
+            String nextNodeName = nodesWithIndexes.get((i + 1) % numNodes).getKey(); // Wraps around to form a ring
+
+            // Get NodeInterface objects from topology
+            NodeInterface currentNode = topology.get(currentNodeName);
+            NodeInterface nextNode = topology.get(nextNodeName);
+
+            // Add the next node as neighbor to the current node
+            currentNode.addNeighbor(nextNodeName, nextNode);
+        }
     }
-
-
-
-
 
 
     /**
