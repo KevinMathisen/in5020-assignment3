@@ -108,13 +108,17 @@ public class ChordProtocol implements Protocol{
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
     public void buildFingerTable() {
+        // Retrieve all nodes
         LinkedHashMap<String, NodeInterface> nodes = network.getTopology();
 
+        // Create the finger table for each node
         for (NodeInterface node : nodes.values()) {
             int nodeIndex = node.getId();                               // NB: Assume that this is set in buildOverlayNetwork()
 
+            // Initialize finger table
             List<Map<String, Object>> fingerTable = new ArrayList<>();
 
+            // Create m amount of entries
             for (int i = 1; i <= m; i++) {
                 Map<String, Object> entry = new HashMap<>();
 
@@ -126,17 +130,22 @@ public class ChordProtocol implements Protocol{
                 end = (i == m) ? end : end-1; // Last entry should be the first value, so do not subtract 1
 
                 // Find the successor node for the interval
+                // This is the first successor which has an index higher or equal to the start value
                 NodeInterface successorNode = node.getSuccessor();      // NB: Assume that neighbors are set in buildOverlayNetwork()
                 while (successorNode.getId() < start) successorNode = successorNode.getSuccessor();
 
+
+                // Save the values to the entry
                 entry.put("start", start);
                 entry.put("interval_start", start);
                 entry.put("interval_end", end);
                 entry.put("successor_node", successorNode.getName());
 
+                // Save the entry to the fingerTable
                 fingerTable.add(entry);
             }
 
+            // Save the finger table to the node
             node.setRoutingTable(fingerTable);
         }
     }
