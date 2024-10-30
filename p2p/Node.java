@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 /*
 
@@ -114,7 +116,20 @@ public class Node implements NodeInterface{
         // in a way that overrides the toString() method. so that the contents of the routing table can be printed
         // here
         if(routingTable!=null){
-            System.out.print("\t"+this.routingTable.toString());
+            if (routingTable instanceof List) {
+                List<Map<String, Object>> entries = (List<Map<String, Object>>) routingTable;
+                StringBuilder sb = new StringBuilder();
+                sb.append("\n\tFingerTable:\n");
+                for (Map<String, Object> entry : entries) {
+                    sb.append("\t\tInterval: [").append(entry.get("interval_start"))
+                    .append(", ").append(entry.get("interval_end"))
+                    .append("), Successor: ").append(entry.get("successor_node"))
+                    .append("\n");
+                }
+                System.out.print(sb.toString());
+            } else {
+                System.out.print("\tFail: " + this.routingTable.toString());
+            }
         }
         System.out.println();
         if(data!=null){
