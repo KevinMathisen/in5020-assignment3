@@ -1,6 +1,4 @@
 import p2p.Network;
-import protocol.ChordProtocol;
-import protocol.Protocol;
 
 
 /**
@@ -82,7 +80,7 @@ public class Simulator{
         ChordProtocolSimulator chordProtocolSimulator = ChordProtocolSimulator.getInstance(myNetwork, m, keyCount);
 
         // stars the chord protocol
-        chordProtocolSimulator.start();
+        chordProtocolSimulator.start(nodeCount, m);
     }
 
     /**

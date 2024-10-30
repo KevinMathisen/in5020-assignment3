@@ -4,6 +4,9 @@ import p2p.Network;
 import p2p.NetworkInterface;
 import p2p.NodeInterface;
 import crypto.ConsistentHashing;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import protocol.ChordProtocol;
 import protocol.LookUpResponse;
 import protocol.Protocol;
@@ -14,7 +17,8 @@ import java.util.*;
  * This class simulates the chord protocol.
  */
 public class ChordProtocolSimulator {
-
+    // define chordProtocol object
+    private ChordProtocol chordProtocol;
 
     // constants
     // length of the identifier used in consistent hasing
@@ -47,6 +51,7 @@ public class ChordProtocolSimulator {
         this.m = m;
         this.nodeCount = nodeCount;
         this.keyCount  = keyCount;
+        this.chordProtocol = new ChordProtocol(m);
     }
 
     /*
@@ -316,28 +321,78 @@ public class ChordProtocolSimulator {
      *     1) builds the chord protocol
      *     2) generate keys and assign it to nodes
      *     3) tests the look up operation (only if necessary)
+     *     4) logs output
      */
-    public void start(){
-
-        // builds the protocol
+    public void start(int nodeCount, int m) {
+        System.out.println("Starting Chord protocol simulation...");
+    
+        // Build protocol (overlay network and routing table)
+        System.out.println("Building protocol...");
         buildProtocol();
-
+        System.out.println("Protocol built successfully.");
+    
+        // Print network structure
+        System.out.println("Printing ring...");
         printRing();
+        System.out.println("Ring printed.");
+    
+        System.out.println("Printing network...");
         printNetwork();
-
-        // tests the lookup operation
-        //testLookUp();
-
-        /*
-        implement this logic
-         */
-        // Look up all the key, print out as required in the Assignment Description
+        System.out.println("Network printed.");
+    
+        // Lookup all keys and log results
+        System.out.println("Starting key lookups...");
+        int totalHops = 0;
+        List<String> lookupResults = new ArrayList<>();
+    
+        // iterates through each key and perfomr a lookup using chordProtocol.lookUp(keyIndex)
+        for (Map.Entry<String, Integer> entry : chordProtocol.keyIndexes.entrySet()) {
+            String keyName = entry.getKey();
+            int keyIndex = entry.getValue();
         
-        // Use keyindexes to get the keys
-        // then call look_up using the index of the keys
-        //      the result is a LookUpResponse object
-        //  Should print the result to the terminal and an output file using result.toString()
-        //  also calculate average hop count which is also specified in the result
+            System.out.println("Looking up key: " + keyName + " with index: " + keyIndex);
+            
+            // Perform the lookup for the current key (response contains lookup path/route and responsible node)
+            LookUpResponse response = chordProtocol.lookUp(keyIndex);
+        
+            System.out.println("Lookup completed for key: " + keyName + ", reached node: " + response.node_name);
+            int hopCount = response.peers_looked_up.size(); 
+            totalHops += hopCount; // Increment total hops for average calculation
+    
+            // Use the response's toString() method to format and save the lookup result
+            lookupResults.add(response.toString());
+        }
+    
+        // Calculate average hop count
+        double avgHopCount = !lookupResults.isEmpty() ? (double) totalHops / lookupResults.size() : 0;
+        System.out.println("Average hop count calculated: " + avgHopCount);
+        
+        // Print each lookup result
+        lookupResults.forEach(System.out::println);
+        System.out.println("average hop count = " + avgHopCount);
+    
+        // Save results to a file in the output directory
+        outputToFile(lookupResults, avgHopCount, nodeCount, m);
     }
-
+    
+    private void outputToFile(List<String> lookupResults, double avgHopCount, int nodeCount, int m) {
+        // Define the output file name based on node count and m value
+        String fileName = "output/output_" + nodeCount + "_nodes_m" + m + ".txt";
+        File outputDir = new File("output");
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+        
+        try (PrintWriter writer = new PrintWriter(new File(fileName), "UTF-8")) {
+            // Write each lookup result
+            for (String result : lookupResults) {
+                writer.println(result);
+            }
+            // Write the average hop count at the end
+            writer.println("average hop count = " + avgHopCount);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

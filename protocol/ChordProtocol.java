@@ -195,30 +195,84 @@ public class ChordProtocol implements Protocol{
     }
 
 
-
     /**
      * This method performs the lookup operation.
-     *  Given the key index, it starts with one of the node in the network and follows through the finger table.
-     *  The correct successors would be identified and the request would be checked in their finger tables successively.
-     *   Finally the request will reach the node that contains the data item.
+     * Given the key index, it starts with one of the node in the network and
+     * follows through the finger table.
+     * The correct successors would be identified and the request would be checked
+     * in their finger tables successively.
+     * Finally the request will reach the node that contains the data item.
      *
      * @param keyIndex index of the key
-     * @return names of nodes that have been searched and the final node that contains the key
+     * @return names of nodes that have been searched and the final node that
+     *         contains the key
      */
-    public LookUpResponse lookUp(int keyIndex){
+    public LookUpResponse lookUp(int keyIndex) {
         /*
-        implement this logic
-
-        Notes kevin:
-            Use network.getTopology() and find the node with the lowest key index to start from? 
-                alternatively chose node with name 'Node 1', or do someting else. 
-                only important that we use the same node to start the search from each time. 
-
-            When using fingertable, look at its values from the buildFingerTable() function
+         * implement this logic
+         * 
+         * Notes kevin:
+         * Use network.getTopology() and find the node with the lowest key index to
+         * start from?
+         * alternatively chose node with name 'Node 1', or do someting else.
+         * only important that we use the same node to start the search from each time.
+         * 
+         * When using fingertable, look at its values from the buildFingerTable()
+         * function
          */
-        return null;
+
+        // Create a set to track which nodes' finger tables are examined during the
+        // lookup.
+        LinkedHashSet<String> peersLookedUp = new LinkedHashSet<>();
+
+        // Start the lookup from a predefined node ('Node 1') to maintain consistency
+        // across all lookups.
+        NodeInterface startNode = network.getTopology().get("Node 1");
+        NodeInterface currentNode = startNode;
+        int hopCount = 0; // Initialize hop count to measure the efficiency of the lookup process.
+
+        while (true) {
+            peersLookedUp.add(currentNode.getName()); // Log the current node as visited.
+            hopCount++;
+
+            // Check if the current node contains the key.
+            Set<Integer> nodeData = (Set<Integer>) currentNode.getData();
+            if (nodeData.contains(keyIndex)) {
+                // If the key is found, return the response with details of the current node.
+                return new LookUpResponse(peersLookedUp, currentNode.getId(), currentNode.getName());
+            }
+
+            // If the key isn't found, use the node's finger table to determine the next
+            // node to visit.
+            List<Map<String, Object>> fingerTable = (List<Map<String, Object>>) currentNode.getRoutingTable();
+            NodeInterface nextNode = currentNode;
+
+            // Identify the most appropriate successor node from the finger table.
+            for (Map<String, Object> entry : fingerTable) {
+                int start = (int) entry.get("start");
+                int end = (int) entry.get("interval_end");
+
+                // Check if the key index falls within the interval of the current finger table
+                // entry.
+                if (keyIndex >= start && keyIndex <= end) {
+                    String successorNodeName = (String) entry.get("successor_node");
+                    nextNode = network.getNode(successorNodeName);
+                    break;
+                }
+            }
+
+            // Prevent infinite loops by stopping if the same node is reached again.
+            if (nextNode.equals(currentNode)) {
+                break;
+            }
+
+            // Proceed to the next node as determined by the finger table.
+            currentNode = nextNode;
+        }
+
+        // Return the response detailing the final node reached if the key was not
+        // found.
+        return new LookUpResponse(peersLookedUp, currentNode.getId(), currentNode.getName());
     }
-
-
 
 }
