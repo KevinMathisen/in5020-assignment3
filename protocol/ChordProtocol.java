@@ -84,6 +84,8 @@ public class ChordProtocol implements Protocol{
      *           3)     add neighbor to the peer (uses Peer.addNeighbor() method)
      */
     public void buildOverlayNetwork(){
+        System.out.println("\tBuilding the overlay network...");
+        
         // Retrieve all nodes in the network
         LinkedHashMap<String, NodeInterface> topology = network.getTopology();
 
@@ -127,6 +129,7 @@ public class ChordProtocol implements Protocol{
      *     3) node - first node in the ring that is responsible for indexes in the interval
      */
     public void buildFingerTable() {
+        System.out.println("\tBuilding the finger tables...");
         // Retrieve all nodes
         LinkedHashMap<String, NodeInterface> nodes = network.getTopology();
 
@@ -134,6 +137,8 @@ public class ChordProtocol implements Protocol{
         // Create the finger table for each node
         for (NodeInterface node : nodes.values()) {
             int nodeIndex = node.getId();
+
+            System.out.println("\t\tBuilding the finger table for node " + node.getName() + " with index " +nodeIndex);
 
             // Initialize finger table
             List<Map<String, Object>> fingerTable = new ArrayList<>();
@@ -167,7 +172,7 @@ public class ChordProtocol implements Protocol{
                 //          This allows us to now directly check if a node's (adjusted) index is bigger than an intervals (adjusted) start
 
                 NodeInterface successorNode = node;                 // Add 2^(m) to start if it is placed before the node's index in the overlay network:
-                int adjusted_start = (start <= nodeIndex) ? start : start + (int) Math.pow(2, m);   
+                int adjusted_start = (start <= nodeIndex) ? start + (int) Math.pow(2, m) : start;
                 int adjusted_index;
 
                 do { 
@@ -187,6 +192,8 @@ public class ChordProtocol implements Protocol{
 
                 // Save the entry to the fingerTable
                 fingerTable.add(entry);
+
+                System.out.println("\t\t\tAdded entry " + i + ":\tStart - " + start + "\tEnd - " + end + "\tSuccessor Node '" + successorNode.getName() + "' with index " + successorNode.getId());
             }
 
             // Save the finger table to the node
