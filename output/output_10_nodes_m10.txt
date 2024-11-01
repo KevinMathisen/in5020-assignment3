@@ -1,0 +1,6 @@
+peers : Node 1	Node 5	Node 9		 hop count : 3	 node index : 1006	 node name : Node 9
+peers : Node 1	Node 5	Node 4	Node 3	Node 2		 hop count : 5	 node index : 266	 node name : Node 2
+peers : Node 1	Node 7		 hop count : 2	 node index : 480	 node name : Node 7
+peers : Node 1	Node 8	Node 6	Node 5		 hop count : 4	 node index : 865	 node name : Node 5
+peers : Node 1	Node 7	Node 8		 hop count : 3	 node index : 601	 node name : Node 8
+Final Average Hop Count: 3,40

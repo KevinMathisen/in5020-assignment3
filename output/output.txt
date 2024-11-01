@@ -1,1 +1,0 @@
-average hop count = 0.0
