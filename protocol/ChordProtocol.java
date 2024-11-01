@@ -236,34 +236,48 @@ public class ChordProtocol implements Protocol{
         // across all lookups.
         NodeInterface startNode = network.getTopology().get("Node 1");
         NodeInterface currentNode = startNode;
-        int hopCount = 0; // Initialize hop count to measure the efficiency of the lookup process.
 
         while (true) {
-            peersLookedUp.add(currentNode.getName()); // Log the current node as visited.
-            hopCount++;
-
             // Check if the current node contains the key.
             Set<Integer> nodeData = (Set<Integer>) currentNode.getData();
+
+            int currentNodeIndex = currentNode.getId();
+            // String nodeNameAndIndex = currentNode.getName() + " (index " + currentNodeIndex + ")";
+            // System.out.println("\tCheck if " + nodeNameAndIndex + " has the key " + keyIndex);
+
             if (nodeData.contains(keyIndex)) {
                 // If the key is found, return the response with details of the current node.
-                return new LookUpResponse(peersLookedUp, currentNode.getId(), currentNode.getName());
+                return new LookUpResponse(peersLookedUp, currentNodeIndex, currentNode.getName());
             }
+
+            peersLookedUp.add(currentNode.getName()); // Log the current node as visited.
 
             // If the key isn't found, use the node's finger table to determine the next
             // node to visit.
             List<Map<String, Object>> fingerTable = (List<Map<String, Object>>) currentNode.getRoutingTable();
             NodeInterface nextNode = currentNode;
 
+            // System.out.println("\tKey not found for " + nodeNameAndIndex + ", trying to find the successor:");
+
             // Identify the most appropriate successor node from the finger table.
             for (Map<String, Object> entry : fingerTable) {
                 int start = (int) entry.get("start");
                 int end = (int) entry.get("interval_end");
 
-                // Check if the key index falls within the interval of the current finger table
-                // entry.
-                if (keyIndex >= start && keyIndex <= end) {
+                // Calculate adjusted interval and key index to handle wrapping of values
+                //      e.g. when m=10, there is 1024 possible indexes. Then we want the key 1000 to match for inverval [900, 100] (as this wraps around 0)
+                //          by adjusting the values we then get that the key 1000 should match for the interval [900, 1124]
+                int adjusted_start = (start < currentNodeIndex) ? start + (int) Math.pow(2, m) : start;
+                int adjusted_end = (end <= currentNodeIndex) ? end + (int) Math.pow(2, m) : end;
+                int adjusted_keyIndex = (keyIndex < currentNodeIndex) ? keyIndex + (int) Math.pow(2, m) : keyIndex;
+
+                // System.out.println("\t\tIs the key index " + keyIndex + " (" + adjusted_keyIndex + ") in the interval [" + start + ", " + end + "] ([" + adjusted_start + ", " + adjusted_end + "])?");
+
+                // Check if the key index falls within the interval of the current finger table entry.
+                if (adjusted_keyIndex >= adjusted_start && adjusted_keyIndex <= adjusted_end) {
                     String successorNodeName = (String) entry.get("successor_node");
                     nextNode = network.getNode(successorNodeName);
+                    // System.out.println("\t\t\tYes! moving to " + successorNodeName + " (index" + nextNode.getId() + ")");
                     break;
                 }
             }
@@ -277,8 +291,7 @@ public class ChordProtocol implements Protocol{
             currentNode = nextNode;
         }
 
-        // Return the response detailing the final node reached if the key was not
-        // found.
+        // Return the response detailing the final node reached if the key was not found.
         return new LookUpResponse(peersLookedUp, currentNode.getId(), currentNode.getName());
     }
 
