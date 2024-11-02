@@ -31,7 +31,7 @@ To start the Simulation, do the following steps:
 1. Compile the java files using `mvn clean package`
 2. Run the following command for starting the simulation:
    ```sh
-   java -cp "target\assignment3-1.0-SNAPSHOT.jar" Simulation <node count> <m>
+   target/IN5020-ASSIGNMENT3-1.0-SNAPSHOT.jar" protocol.Simulator <node count> <m>
    ```
 
 ### Command-line arguments
