@@ -1,11 +1,10 @@
 package protocol;
 
 
+import java.util.*;
+
 import crypto.ConsistentHashing;
 import p2p.NetworkInterface;
-
-
-import java.util.*;
 import p2p.NodeInterface;
 
 /**
@@ -293,6 +292,10 @@ public class ChordProtocol implements Protocol{
 
         // Return the response detailing the final node reached if the key was not found.
         return new LookUpResponse(peersLookedUp, currentNode.getId(), currentNode.getName());
+    }
+
+    public void setNetwork(Object network) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

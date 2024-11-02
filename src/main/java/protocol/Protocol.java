@@ -1,9 +1,9 @@
 package protocol;
 
 
-import p2p.NetworkInterface;
-
 import java.util.HashMap;
+
+import p2p.NetworkInterface;
 
 public interface Protocol {
 
