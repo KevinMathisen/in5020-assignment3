@@ -26,7 +26,7 @@ To run the project, you need the following requirements:
 ## Starting the Simulation
 
 To start the Simulation, do the following steps:
-(TODO: update)
+
 
 1. Compile the java files using `mvn clean package`
 2. Run the following command for starting the simulation:
